@@ -1890,9 +1890,6 @@ elif _page == "results":
             if len(std_green) > 2:
                 ax.plot(std_green, ret_green, color=GREEN, lw=2.0, zorder=4,
                         label=f"MV Frontier (ESG \u2265 {esg_thresh:.1f})")
-            if len(std_blue) > 2:
-                ax.plot(std_blue, ret_blue, color=BLUE, lw=2.5, zorder=5,
-                        linestyle="--", label="MV Frontier (all assets)")
             all_stds = list(std_blue) + list(std_green) + [sp*100, sp_tan_all*100]
             all_rets = list(ret_blue) + list(ret_green) + [ep*100, ep_tan_all*100, rf*100]
             x_pad = max(all_stds) * 0.08
