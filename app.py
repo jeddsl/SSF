@@ -523,8 +523,9 @@ def build_mv_frontier(mu, cov, bounds=None, n_points=100):
     n = len(mu)
     b = bounds or [(0.,1.)]*n
     w_mv = _minimise_sd(mu, cov, bounds=b)
-    ret_min = port_ret(w_mv, mu)
+    ret_mv  = port_ret(w_mv, mu)
     ret_max = float(np.max([port_ret(np.eye(n)[i], mu) for i in range(n) if b[i][1] > 0]))
+    ret_min = float(np.min([port_ret(np.eye(n)[i], mu) for i in range(n) if b[i][1] > 0]))
     targets = np.linspace(ret_min, ret_max, n_points)
     stds, rets = [], []
     for rt in targets:
