@@ -1886,22 +1886,23 @@ elif _page == "results":
     with _c1:
         fig, ax = plt.subplots(figsize=(6.5, 5.5))
         fig.patch.set_facecolor(CHART_BG)
-        if len(std_blue) > 2:
-            ax.plot(std_blue, ret_blue, color=BLUE, lw=2.2, zorder=4, label="MV Frontier (all assets)")
         if len(std_green) > 2:
-            ax.plot(std_green, ret_green, color=GREEN, lw=2.2, zorder=4,
+            ax.plot(std_green, ret_green, color=GREEN, lw=2.0, zorder=4,
                     label=f"MV Frontier (ESG \u2265 {esg_thresh:.1f})")
-        if sp_tan_all > 1e-9 and len(std_blue) > 0:
-            cml_max = max(np.nanmax(std_blue), sp_tan_all*100) * 1.5
-            sd_cml  = np.linspace(0, cml_max, 300)
-            ax.plot(sd_cml, rf*100 + (ep_tan_all-rf)/sp_tan_all*sd_cml,
-                    color=BLUE, lw=1.4, linestyle="--", zorder=3, label="CML (all assets)")
+        if len(std_blue) > 2:
+            ax.plot(std_blue, ret_blue, color=BLUE, lw=2.5, zorder=5,
+                    linestyle="--", label="MV Frontier (all assets)")
         if sp_tan_esg > 1e-9 and len(std_green) > 0:
             cml_max2 = max(np.nanmax(std_green), sp_tan_esg*100) * 1.5
             sd_cml2  = np.linspace(0, cml_max2, 300)
             ax.plot(sd_cml2, rf*100 + (ep_tan_esg-rf)/sp_tan_esg*sd_cml2,
                     color=GREEN, lw=1.4, linestyle="--", zorder=3,
                     label=f"CML (ESG \u2265 {esg_thresh:.1f})")
+        if sp_tan_all > 1e-9 and len(std_blue) > 0:
+            cml_max = max(np.nanmax(std_blue), sp_tan_all*100) * 1.5
+            sd_cml  = np.linspace(0, cml_max, 300)
+            ax.plot(sd_cml, rf*100 + (ep_tan_all-rf)/sp_tan_all*sd_cml,
+                    color=BLUE, lw=1.4, linestyle="--", zorder=4, label="CML (all assets)")
         ax.scatter(sp_tan_all*100, ep_tan_all*100, color=BLUE, s=140, zorder=9, edgecolors="white", lw=1.4, marker="*")
         ax.annotate("tangency (all)", (sp_tan_all*100, ep_tan_all*100),
                     textcoords="offset points", xytext=(7, 2), fontsize=7, color=BLUE, fontstyle="italic")
