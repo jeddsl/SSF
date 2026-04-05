@@ -285,13 +285,29 @@ thead tr th { color: var(--text-3) !important; font-size: 0.64rem !important; le
 tbody tr td { color: var(--text-2) !important; border-bottom: 1px solid var(--sep) !important; padding: 0.5rem 0.8rem !important; }
 tbody tr:hover td { background: var(--bg-elevated) !important; }
 [data-testid="stExpander"] {
-  border: 1px solid var(--sep) !important; border-radius: var(--r-md) !important;
-  background: var(--bg-card) !important; margin-bottom: 0.75rem !important;
+    border: 1px solid var(--sep) !important;
+    border-radius: var(--r-md) !important;
+    background: var(--bg-card) !important;
+    margin-bottom: 0.75rem !important;
 }
-[data-testid="stExpander"] summary { color: var(--text-2) !important; font-size: 0.88rem !important; font-weight: 500 !important; font-family: var(--font) !important; }
-[data-testid="stExpander"] summary svg { display: none !important; }
-[data-testid="stExpander"] summary [data-testid="stExpanderToggleIcon"] { display: none !important; }
-[data-testid="stExpander"] summary > div > div:first-child:not(:only-child) { display: none !important; }
+[data-testid="stExpander"] summary {
+    color: var(--text-2) !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    font-family: var(--font) !important;
+    list-style: none !important;
+}
+[data-testid="stExpander"] summary::-webkit-details-marker {
+    display: none !important;
+}
+[data-testid="stExpanderToggleIcon"] {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    font-size: 0 !important;
+    overflow: hidden !important;
+}
 @keyframes gpFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes gpFadeIn { from { opacity: 0; } to { opacity: 1; } }
 .gp-hero       { animation: gpFadeUp 0.45s var(--ease-out) both; }
