@@ -240,7 +240,7 @@ div.stButton > button {
 div.stButton > button:hover { background: var(--accent-hover) !important; transform: translateY(-1px) !important; }
 div.stButton > button:active { transform: translateY(0) scale(0.99) !important; }
 .stNumberInput input, .stTextInput input, .stTextArea textarea {
-  background: var(--bg-input) !important; color: var(--text-1) !important;
+  background: var(--bg-input) !important; color: #000000 !important;
   border: 1px solid var(--sep) !important; border-radius: var(--r-sm) !important;
   font-family: var(--font) !important; font-size: 0.88rem !important;
   transition: border-color 0.15s !important;
