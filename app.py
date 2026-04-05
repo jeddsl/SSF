@@ -1883,7 +1883,7 @@ elif _page == "results":
         for sp_ in ax.spines.values(): sp_.set_color(SPINE_C)
         ax.grid(True, alpha=0.3, color=GRID_C, linestyle="--", linewidth=0.6)
 
-   with _c1:
+    with _c1:
             fig, ax = plt.subplots(figsize=(6.5, 5.5))
             fig.patch.set_facecolor(CHART_BG)
             if len(std_green) > 2:
