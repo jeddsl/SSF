@@ -1893,13 +1893,13 @@ elif _page == "results":
             ax.plot(std_blue, ret_blue, color=BLUE, lw=2.5, zorder=5,
                     linestyle="--", label="MV Frontier (all assets)")
         if sp_tan_esg > 1e-9 and len(std_green) > 0:
-            cml_max2 = max(np.nanmax(std_green), sp_tan_esg*100) * 1.5
+            cml_max2 = sp_tan_esg * 100 * 1.2
             sd_cml2  = np.linspace(0, cml_max2, 300)
             ax.plot(sd_cml2, rf*100 + (ep_tan_esg-rf)/sp_tan_esg*sd_cml2,
                     color=GREEN, lw=1.4, linestyle="--", zorder=3,
                     label=f"CML (ESG \u2265 {esg_thresh:.1f})")
         if sp_tan_all > 1e-9 and len(std_blue) > 0:
-            cml_max = max(np.nanmax(std_blue), sp_tan_all*100) * 1.5
+            cml_max = sp_tan_all * 100 * 1.2
             sd_cml  = np.linspace(0, cml_max, 300)
             ax.plot(sd_cml, rf*100 + (ep_tan_all-rf)/sp_tan_all*sd_cml,
                     color=BLUE, lw=1.4, linestyle="--", zorder=4, label="CML (all assets)")
@@ -1919,7 +1919,12 @@ elif _page == "results":
                         textcoords="offset points", xytext=(4, 3), fontsize=7, color=GREY)
         ax.set_xlabel("Std Dev (%)", fontsize=9, color=GREY)
         ax.set_ylabel("Expected Return (%)", fontsize=9, color=GREY)
-        ax.set_xlim(left=0)
+        all_stds = list(std_blue) + list(std_green) + [sp*100, sp_tan_all*100]
+        all_rets = list(ret_blue) + list(ret_green) + [ep*100, ep_tan_all*100]
+        x_pad = (max(all_stds) - min(all_stds)) * 0.15
+        y_pad = (max(all_rets) - min(all_rets)) * 0.15
+        ax.set_xlim(max(0, min(all_stds) - x_pad), max(all_stds) + x_pad)
+        ax.set_ylim(min(all_rets) - y_pad, max(all_rets) + y_pad)
         ax.legend(fontsize=7, framealpha=0.9, facecolor=LEG_BG, edgecolor=LEG_ED, labelcolor=LABEL_C)
         _style_ax(ax, "Mean-Variance Frontier")
         fig.tight_layout(); st.pyplot(fig); plt.close()
