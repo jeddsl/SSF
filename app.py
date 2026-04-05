@@ -292,10 +292,18 @@ tbody tr:hover td { background: var(--bg-elevated) !important; }
 }
 [data-testid="stExpander"] summary {
     color: var(--text-2) !important;
-    font-size: 0.88rem !important;
+    font-size: 0 !important;
     font-weight: 500 !important;
     font-family: var(--font) !important;
     list-style: none !important;
+}
+[data-testid="stExpander"] summary p {
+    font-size: 0.88rem !important;
+    color: var(--text-2) !important;
+    font-weight: 500 !important;
+    font-family: var(--font) !important;
+    display: inline !important;
+}
 }
 [data-testid="stExpander"] summary::-webkit-details-marker {
     display: none !important;
