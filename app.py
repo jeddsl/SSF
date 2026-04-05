@@ -289,9 +289,9 @@ tbody tr:hover td { background: var(--bg-elevated) !important; }
   background: var(--bg-card) !important; margin-bottom: 0.75rem !important;
 }
 [data-testid="stExpander"] summary { color: var(--text-2) !important; font-size: 0.88rem !important; font-weight: 500 !important; font-family: var(--font) !important; }
-[data-testid="stExpander"] details summary svg { display: none !important; }
-[data-testid="stExpander"] details summary [data-testid="stExpanderToggleIcon"] { display: none !important; }
-[data-testid="stExpander"] details summary div:first-child { display: none !important; }
+[data-testid="stExpander"] summary svg { display: none !important; }
+[data-testid="stExpander"] summary [data-testid="stExpanderToggleIcon"] { display: none !important; }
+[data-testid="stExpander"] summary > div > div:first-child:not(:only-child) { display: none !important; }
 @keyframes gpFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes gpFadeIn { from { opacity: 0; } to { opacity: 1; } }
 .gp-hero       { animation: gpFadeUp 0.45s var(--ease-out) both; }
