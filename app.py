@@ -430,6 +430,31 @@ hr { border: none !important; border-top: 1px solid var(--sep) !important; margi
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""       # ← add the JS block starting here
+<script>
+(function() {
+    function removeArrowText() {
+        document.querySelectorAll('[data-testid="stExpander"] summary').forEach(function(summary) {
+            Array.from(summary.childNodes).forEach(function(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    node.textContent = '';
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    var t = node.textContent || '';
+                    if (t.includes('arrow_right') || t.includes('arrow_down') || t.includes('arrow_up')) {
+                        node.style.cssText = 'display:none!important;width:0;height:0;overflow:hidden;';
+                    }
+                }
+            });
+        });
+    }
+    var obs = new MutationObserver(removeArrowText);
+    obs.observe(document.body, { childList: true, subtree: true });
+    removeArrowText();
+})();
+</script>
+""", unsafe_allow_html=True)
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # ESG DATABASE
 # ══════════════════════════════════════════════════════════════════════════════
