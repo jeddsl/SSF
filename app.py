@@ -2174,11 +2174,22 @@ elif _page == "results":
                      bbox=dict(boxstyle="round,pad=0.25",
                                fc=CHART_BG, ec=ORANGE, alpha=0.85, lw=0.6))
 
-        # ── Axis limits: add padding so annotations aren't clipped ────────
+        # ── Axis limits: include ALL points so left-side assets (e.g. Tech ETF) are never clipped ────────
         if _esg_x_sorted:
-            _xpad = (max(_esg_x_sorted) - min(_esg_x_sorted)) * 0.18
-            ax2.set_xlim(max(0, min(_esg_x_sorted) - _xpad * 2),
-                         max(_esg_x_sorted) + _xpad)
+            all_esgs = list(esg_scores) + _esg_x_sorted
+            if '_esg_unc' in locals():
+                all_esgs.append(_esg_unc)
+            if '_esg_opt_pt' in locals():
+                all_esgs.append(_esg_opt_pt)
+            if _screen_differs and '_esg_esg_pt' in locals():
+                all_esgs.append(_esg_esg_pt)
+
+            min_esg = min(all_esgs)
+            max_esg = max(all_esgs)
+            _xpad = (max_esg - min_esg) * 0.15 if max_esg > min_esg else 1.0
+
+            ax2.set_xlim(max(0, min_esg - _xpad * 1.5),
+                         min(10, max_esg + _xpad))
         _all_sr = ([sr, _sr_unc] + (_sr_sorted or []) +
                    list(_indiv_sr) +
                    ([_sr_esg_t] if _screen_differs else []))
@@ -2192,7 +2203,9 @@ elif _page == "results":
                    edgecolor=LEG_ED, labelcolor=LABEL_C,
                    loc="upper right" if not _screen_differs else "lower left")
         _style_ax(ax2, "ESG–Sharpe Frontier")
-        fig2.tight_layout(); st.pyplot(fig2); plt.close()
+        fig2.tight_layout()
+        st.pyplot(fig2, use_container_width=True)
+        plt.close()
 
     st.markdown('<div class="section-header">Portfolio Breakdown</div>', unsafe_allow_html=True)
     _c3, _c4 = st.columns(2)
