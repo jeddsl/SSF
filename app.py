@@ -2213,23 +2213,6 @@ elif _page == "results":
         st.pyplot(fig2, use_container_width=True)
         plt.close()
 
-        # y-limits (unchanged — already good)
-        _all_sr = ([sr, _sr_unc] + (_sr_sorted or []) +
-                   list(_indiv_sr) +
-                   ([_sr_esg_t] if _screen_differs else []))
-        _sr_range = max(_all_sr) - min(_all_sr) if len(_all_sr) > 1 else 0.1
-        ax2.set_ylim(min(_all_sr) - _sr_range * 0.25,
-                     max(_all_sr) + _sr_range * 0.30)
-
-        ax2.set_xlabel("Portfolio ESG Score (0–10)", fontsize=9, color=GREY)
-        ax2.set_ylabel("Sharpe Ratio", fontsize=9, color=GREY)
-        ax2.legend(fontsize=7, framealpha=0.92, facecolor=LEG_BG,
-                   edgecolor=LEG_ED, labelcolor=LABEL_C,
-                   loc="upper right" if not _screen_differs else "lower left")
-        _style_ax(ax2, "ESG–Sharpe Frontier")
-        fig2.tight_layout()
-        st.pyplot(fig2, use_container_width=True)   # ← this prevents Streamlit clipping
-        plt.close()
 
     st.markdown('<div class="section-header">Portfolio Breakdown</div>', unsafe_allow_html=True)
     _c3, _c4 = st.columns(2)
