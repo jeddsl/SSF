@@ -2113,7 +2113,7 @@ elif _page == "results":
             _esg_x_sorted = [p[0] for p in _pts]
             _sr_sorted     = [p[1] for p in _pts]
         else:
-            _esg_x_sorted = []; _sr_sorted = []]
+            _esg_x_sorted = []; _sr_sorted = []
 
         # ── Key portfolio points ───────────────────────────────────────────
         _w_unc, _ep_unc, _sp_unc, _sr_unc = find_tangency(mu, cov, rf)
