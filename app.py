@@ -2174,21 +2174,44 @@ elif _page == "results":
                      bbox=dict(boxstyle="round,pad=0.25",
                                fc=CHART_BG, ec=ORANGE, alpha=0.85, lw=0.6))
 
-        # ── Axis limits: include EVERY plotted point (assets + frontier + key portfolios)
-        all_esgs = list(esg_scores) + _esg_x_sorted
-        if '_esg_unc' in locals() and _esg_unc is not None:
-            all_esgs.append(_esg_unc)
-        if '_esg_esg_pt' in locals() and _esg_esg_pt is not None:
-            all_esgs.append(_esg_esg_pt)
-        if '_esg_opt_pt' in locals() and _esg_opt_pt is not None:
-            all_esgs.append(_esg_opt_pt)
 
-        min_esg = min(all_esgs) if all_esgs else 0
-        max_esg = max(all_esgs) if all_esgs else 10
-        _xpad = (max_esg - min_esg) * 0.20 if max_esg > min_esg else 2.0   # generous left padding
+        if _esg_x_sorted:
+            all_esgs = list(esg_scores) + _esg_x_sorted
+            if '_esg_unc' in locals() and _esg_unc is not None:
+                all_esgs.append(_esg_unc)
+            if '_esg_opt_pt' in locals() and _esg_opt_pt is not None:
+                all_esgs.append(_esg_opt_pt)
+            if _screen_differs and '_esg_esg_pt' in locals() and _esg_esg_pt is not None:
+                all_esgs.append(_esg_esg_pt)
 
-        ax2.set_xlim(max(0, min_esg - _xpad * 1.8),
-                     min(10, max_esg + _xpad))
+            min_esg = min(all_esgs) if all_esgs else 0
+            max_esg = max(all_esgs) if all_esgs else 10
+
+            # Extra generous left padding so Tech ETF and its label are never cut off
+            _xpad = (max_esg - min_esg) * 0.30 if max_esg > min_esg else 2.5
+            left_limit = max(0, min_esg - _xpad * 2.2)   # forces x to start near 0-2
+
+            ax2.set_xlim(left_limit, min(10, max_esg + _xpad * 1.1))
+        else:
+            ax2.set_xlim(0, 10)
+
+        # y-limits (unchanged — already optimal)
+        _all_sr = ([sr, _sr_unc] + (_sr_sorted or []) +
+                   list(_indiv_sr) +
+                   ([_sr_esg_t] if _screen_differs else []))
+        _sr_range = max(_all_sr) - min(_all_sr) if len(_all_sr) > 1 else 0.1
+        ax2.set_ylim(min(_all_sr) - _sr_range * 0.25,
+                     max(_all_sr) + _sr_range * 0.30)
+
+        ax2.set_xlabel("Portfolio ESG Score (0–10)", fontsize=9, color=GREY)
+        ax2.set_ylabel("Sharpe Ratio", fontsize=9, color=GREY)
+        ax2.legend(fontsize=7, framealpha=0.92, facecolor=LEG_BG,
+                   edgecolor=LEG_ED, labelcolor=LABEL_C,
+                   loc="upper right" if not _screen_differs else "lower left")
+        _style_ax(ax2, "ESG–Sharpe Frontier")
+        fig2.tight_layout()
+        st.pyplot(fig2, use_container_width=True)
+        plt.close()
 
         # y-limits (unchanged — already good)
         _all_sr = ([sr, _sr_unc] + (_sr_sorted or []) +
