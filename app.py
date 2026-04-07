@@ -2051,11 +2051,10 @@ elif _page == "results":
             fig.tight_layout(); st.pyplot(fig); plt.close()
 
     with _c2:
-        # ── Build ESG-SR frontier via continuous ESG constraint sweep ──────
-        # For each ESG floor τ we solve: max Sharpe s.t. w·ESG ≥ τ, Σw=1, w≥0
-        # This yields a smooth curve (one point per τ) rather than a few
-        # per-asset-subset jumps.  We also include the unconstrained tangency
-        # as the left-most anchor (τ = achievable minimum).
+                # ── Build FULL ESG-SR frontier (both sides of tangency) ─────────────
+        # Left side:  max Sharpe s.t. ESG ≤ τ   (curves UP to tangency)
+        # Right side: max Sharpe s.t. ESG ≥ τ   (curves DOWN from tangency)
+        # This gives the complete curved frontier across the whole 0–10 range.
         _uncw0 = np.ones(n) / n
         _unc_res = minimize(
             lambda w: -port_sr(w, mu, cov, rf), _uncw0, method="SLSQP",
@@ -2063,10 +2062,32 @@ elif _page == "results":
             constraints=[{"type": "eq", "fun": lambda w: np.sum(w) - 1}],
             options={"ftol": 1e-10, "maxiter": 800})
         _unc_w = _unc_res.x if _unc_res.success else _uncw0
-        _esg_lo = float(np.dot(_unc_w, esg_scores))          # unconstrained ESG
-        _esg_hi = float(np.max(esg_scores)) * 0.999          # hard upper limit
+        _esg_lo = float(np.dot(_unc_w, esg_scores))          # unconstrained ESG (peak)
+        _esg_hi = float(np.max(esg_scores)) * 0.999
+        _esg_min = float(np.min(esg_scores))
 
-        _sr_curve = []; _esg_x_curve = []
+        _esg_x_curve = []; _sr_curve = []
+
+        # LEFT SIDE (lower ESG → rising curve to tangency)
+        for _tau in np.linspace(_esg_min, _esg_lo, 40):
+            try:
+                _r = minimize(
+                    lambda w: -port_sr(w, mu, cov, rf),
+                    _uncw0,
+                    method="SLSQP",
+                    bounds=[(0., 1.)] * n,
+                    constraints=[
+                        {"type": "eq",   "fun": lambda w: np.sum(w) - 1},
+                        {"type": "ineq", "fun": lambda w, t=_tau: t - float(np.dot(w, esg_scores))},  # ESG <= τ
+                    ],
+                    options={"ftol": 1e-9, "maxiter": 600})
+                if _r.success and port_sd(_r.x, cov) > 1e-9:
+                    _esg_x_curve.append(float(np.dot(_r.x, esg_scores)))
+                    _sr_curve.append(port_sr(_r.x, mu, cov, rf))
+            except Exception:
+                continue
+
+        # RIGHT SIDE (higher ESG → falling curve from tangency)
         for _tau in np.linspace(_esg_lo, _esg_hi, 60):
             try:
                 _r = minimize(
@@ -2092,7 +2113,7 @@ elif _page == "results":
             _esg_x_sorted = [p[0] for p in _pts]
             _sr_sorted     = [p[1] for p in _pts]
         else:
-            _esg_x_sorted = []; _sr_sorted = []
+            _esg_x_sorted = []; _sr_sorted = []]
 
         # ── Key portfolio points ───────────────────────────────────────────
         _w_unc, _ep_unc, _sp_unc, _sr_unc = find_tangency(mu, cov, rf)
@@ -2115,26 +2136,12 @@ elif _page == "results":
         ax2.set_facecolor(CHART_BG)
 
         # ── Frontier curve ─────────────────────────────────────────────────
+                # ── Frontier curve (now fully curved on BOTH sides of tangency) ─────
         if len(_esg_x_sorted) >= 2:
-            # Add flat left segment (max SR is constant left of tangency)
-            min_esg_plot = min(esg_scores) if len(esg_scores) > 0 else 0.0
-            tangency_esg = _esg_x_sorted[0]
-            if min_esg_plot < tangency_esg - 0.01:
-                _left_esgs = np.linspace(min_esg_plot, tangency_esg, 15)[:-1].tolist()
-                _left_srs  = [_sr_sorted[0]] * len(_left_esgs)   # flat at max SR
-                _esg_full  = _left_esgs + _esg_x_sorted
-                _sr_full   = _left_srs  + _sr_sorted
-            else:
-                _esg_full = _esg_x_sorted
-                _sr_full  = _sr_sorted
-
-            # Plot the complete frontier (now spans full left-to-right)
-            ax2.plot(_esg_full, _sr_full, color=GREEN, lw=2.4,
+            ax2.plot(_esg_x_sorted, _sr_sorted, color=GREEN, lw=2.4,
                      zorder=4, label="ESG–SR frontier")
-
-            # Shading now covers the whole frontier
-            _y_fill = max(min(_sr_full) * 0.88, 0)
-            ax2.fill_between(_esg_full, _y_fill, _sr_full,
+            _y_fill = max(min(_sr_sorted) * 0.88, 0)
+            ax2.fill_between(_esg_x_sorted, _y_fill, _sr_sorted,
                              alpha=0.07, color=GREEN, zorder=2)
 
         # ── Individual assets ──────────────────────────────────────────────
