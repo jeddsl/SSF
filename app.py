@@ -1513,10 +1513,134 @@ if _page == "input":
                 row["manual_ret_vol"] = manual_ret_vol.get(t, None)
 
     st.markdown('<div class="gp-label">Investor Preferences</div>', unsafe_allow_html=True)
-    pref_c1, pref_c2, pref_c3 = st.columns(3)
-    with pref_c1: gamma = st.slider("Risk Aversion (γ)", 0.5, 10.0, 3.0, 0.5)
-    with pref_c2: lam   = st.slider("ESG Preference (λ)", 0.0, 5.0, 1.0, 0.1)
-    with pref_c3: rf    = st.number_input("Risk-Free Rate (%)", 0.0, 20.0, 4.0, 0.1, format="%.1f") / 100
+
+    # ── Preference input mode toggle ──────────────────────────────────────────
+    _pref_mode = st.radio(
+        "How would you like to set your preferences?",
+        ["Manual sliders", "Take the quiz"],
+        horizontal=True,
+        index=0,
+        key="pref_mode",
+    )
+
+    if _pref_mode == "Take the quiz":
+        st.markdown(
+            '<div class="info-box" style="margin-bottom:1.2rem;">'
+            '<strong>Quick Preference Quiz</strong> — answer 6 short questions and we\'ll '
+            'determine your risk aversion (γ) and ESG preference (λ) for you.</div>',
+            unsafe_allow_html=True)
+
+        # ── RISK questions (maps → γ) ─────────────────────────────────────────
+        st.markdown(
+            '<div style="font-size:0.72rem;font-weight:700;letter-spacing:0.10em;'
+            'text-transform:uppercase;color:rgba(242,242,242,0.36);margin:1.2rem 0 0.6rem;">'
+            'Risk Tolerance</div>',
+            unsafe_allow_html=True)
+
+        _rq1 = st.radio(
+            "1 · Your portfolio falls 25% in a year. What do you do?",
+            ["Sell everything — I can't take further losses (3)",
+             "Sell some to reduce exposure (2)",
+             "Hold and wait for a recovery (1)",
+             "Buy more — a great opportunity (0)"],
+            key="quiz_r1", index=2)
+
+        _rq2 = st.radio(
+            "2 · Which return/risk profile appeals to you most?",
+            ["4% return, ~3% annual volatility — very stable (3)",
+             "8% return, ~10% volatility — moderate swings (2)",
+             "13% return, ~20% volatility — significant swings (1)",
+             "20%+ return, ~35% volatility — large swings are fine (0)"],
+            key="quiz_r2", index=1)
+
+        _rq3 = st.radio(
+            "3 · What is your investment time horizon?",
+            ["Under 2 years — I may need the money soon (3)",
+             "2–5 years (2)",
+             "5–10 years (1)",
+             "10 + years — long-term wealth building (0)"],
+            key="quiz_r3", index=1)
+
+        # ── ESG questions (maps → λ) ──────────────────────────────────────────
+        st.markdown(
+            '<div style="font-size:0.72rem;font-weight:700;letter-spacing:0.10em;'
+            'text-transform:uppercase;color:rgba(242,242,242,0.36);margin:1.4rem 0 0.6rem;">'
+            'ESG Preference</div>',
+            unsafe_allow_html=True)
+
+        _eq1 = st.radio(
+            "4 · How important is sustainability in your investments?",
+            ["Not important — purely financial returns matter (0)",
+             "Somewhat — I prefer sustainable where equal (1)",
+             "Very important — ESG is a key objective (2)",
+             "Central — ESG is my primary mandate (3)"],
+            key="quiz_e1", index=1)
+
+        _eq2 = st.radio(
+            "5 · Would you accept a lower return for a higher ESG score?",
+            ["Never — I won't sacrifice any return (0)",
+             "Only a small amount — up to ~0.5%/yr (1)",
+             "Yes — up to ~2%/yr feels like a fair trade (2)",
+             "Yes — ESG quality is worth more than return to me (3)"],
+            key="quiz_e2", index=1)
+
+        _eq3 = st.radio(
+            "6 · Which best describes your view on ESG screening?",
+            ["ESG scores are noise — I ignore them (0)",
+             "Nice to have, but won't drive allocation (1)",
+             "I want meaningful ESG tilts in my portfolio (2)",
+             "I require a hard ESG minimum — no exceptions (3)"],
+            key="quiz_e3", index=1)
+
+        # ── Score → parameter mapping ─────────────────────────────────────────
+        def _score(opt_str):
+            """Extract the trailing (digit) from the option string."""
+            return int(opt_str.strip()[-2])   # e.g. "(2)" → 2
+
+        _risk_score = _score(_rq1) + _score(_rq2) + _score(_rq3)   # 0–9
+        _esg_score  = _score(_eq1) + _score(_eq2) + _score(_eq3)    # 0–9
+
+        # Piecewise mapping — risk score → γ
+        _gamma_map = [(2, 1.0), (4, 2.5), (6, 4.5), (8, 7.0), (9, 9.5)]
+        gamma = next(v for threshold, v in _gamma_map if _risk_score <= threshold)
+
+        # Piecewise mapping — ESG score → λ
+        _lam_map = [(1, 0.0), (3, 0.5), (5, 1.5), (7, 3.0), (9, 5.0)]
+        lam = next(v for threshold, v in _lam_map if _esg_score <= threshold)
+
+        # ── Show derived values ───────────────────────────────────────────────
+        _qc1, _qc2 = st.columns(2)
+        with _qc1:
+            st.markdown(
+                f'<div class="metric-card card-vol" style="margin-top:1rem;">'
+                f'<div class="metric-label">Derived Risk Aversion (γ)</div>'
+                f'<div class="metric-value">{gamma}</div>'
+                f'<div style="font-size:0.72rem;color:rgba(242,242,242,0.4);margin-top:0.4rem;">'
+                f'Risk score: {_risk_score}/9 — '
+                f'{"low" if _risk_score <= 2 else "moderate-low" if _risk_score <= 4 else "moderate" if _risk_score <= 6 else "high"} aversion'
+                f'</div></div>',
+                unsafe_allow_html=True)
+        with _qc2:
+            st.markdown(
+                f'<div class="metric-card card-esg" style="margin-top:1rem;">'
+                f'<div class="metric-label">Derived ESG Preference (λ)</div>'
+                f'<div class="metric-value">{lam}</div>'
+                f'<div style="font-size:0.72rem;color:rgba(242,242,242,0.4);margin-top:0.4rem;">'
+                f'ESG score: {_esg_score}/9 — '
+                f'{"none" if _esg_score <= 1 else "low" if _esg_score <= 3 else "moderate" if _esg_score <= 5 else "high" if _esg_score <= 7 else "very high"} preference'
+                f'</div></div>',
+                unsafe_allow_html=True)
+        st.markdown("<div style='height:0.5rem;'></div>", unsafe_allow_html=True)
+
+    else:
+        # Manual sliders (original behaviour)
+        pref_c1, pref_c2 = st.columns(2)
+        with pref_c1: gamma = st.slider("Risk Aversion (γ)", 0.5, 10.0, 3.0, 0.5)
+        with pref_c2: lam   = st.slider("ESG Preference (λ)", 0.0, 5.0, 1.0, 0.1)
+
+    pref_rf_col, _ = st.columns([1, 2])
+    with pref_rf_col:
+        rf = st.number_input("Risk-Free Rate (%)", 0.0, 20.0, 4.0, 0.1, format="%.1f") / 100
 
     st.markdown('<div class="gp-label">ESG Screen</div>', unsafe_allow_html=True)
     use_exclusion = st.checkbox("Apply minimum ESG exclusion screen", value=False)
