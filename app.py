@@ -1761,7 +1761,6 @@ elif _page == "results":
         "E[R] (%)":        [f"{r*100:.2f}"  for r in mu],
         "Vol (%)":         [f"{v*100:.2f}"  for v in vols],
         "ESG (0–10)":      [f"{s:.2f}"      for s in esg_scores],
-        "In ESG frontier": ["" if m else "Excluded" for m in active_mask],
     }), use_container_width=True, hide_index=True)
 
     if input_mode == "Ticker-based input" and ticker_data_display is not None:
