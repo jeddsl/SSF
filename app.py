@@ -2116,10 +2116,25 @@ elif _page == "results":
 
         # ── Frontier curve ─────────────────────────────────────────────────
         if len(_esg_x_sorted) >= 2:
-            ax2.plot(_esg_x_sorted, _sr_sorted, color=GREEN, lw=2.4,
+            # Add flat left segment (max SR is constant left of tangency)
+            min_esg_plot = min(esg_scores) if len(esg_scores) > 0 else 0.0
+            tangency_esg = _esg_x_sorted[0]
+            if min_esg_plot < tangency_esg - 0.01:
+                _left_esgs = np.linspace(min_esg_plot, tangency_esg, 15)[:-1].tolist()
+                _left_srs  = [_sr_sorted[0]] * len(_left_esgs)   # flat at max SR
+                _esg_full  = _left_esgs + _esg_x_sorted
+                _sr_full   = _left_srs  + _sr_sorted
+            else:
+                _esg_full = _esg_x_sorted
+                _sr_full  = _sr_sorted
+
+            # Plot the complete frontier (now spans full left-to-right)
+            ax2.plot(_esg_full, _sr_full, color=GREEN, lw=2.4,
                      zorder=4, label="ESG–SR frontier")
-            _y_fill = max(min(_sr_sorted) * 0.88, 0)
-            ax2.fill_between(_esg_x_sorted, _y_fill, _sr_sorted,
+
+            # Shading now covers the whole frontier
+            _y_fill = max(min(_sr_full) * 0.88, 0)
+            ax2.fill_between(_esg_full, _y_fill, _sr_full,
                              alpha=0.07, color=GREEN, zorder=2)
 
         # ── Individual assets ──────────────────────────────────────────────
