@@ -623,7 +623,16 @@ if _page == "input":
             for i in range(int(n_assets)):
                 c1, c2 = st.columns([1.1, 1.8])
                 ticker = c1.text_input("", value=default_tickers[i], key=f"ticker_{i}", label_visibility="collapsed").upper().strip()
-                name   = c2.text_input("", value=default_names[i],   key=f"ticker_name_{i}", label_visibility="collapsed")
+                _cache_key = f"fetched_name_{ticker}"
+                if ticker and _cache_key not in st.session_state:
+                    try:
+                        _info = yf.Ticker(ticker).info
+                        _fetched = _info.get("longName") or _info.get("shortName") or ticker
+                        st.session_state[_cache_key] = _fetched
+                    except Exception:
+                        st.session_state[_cache_key] = ticker
+                _default_name = st.session_state.get(_cache_key, default_names[i])
+                name = c2.text_input("", value=_default_name, key=f"ticker_name_{i}", label_visibility="collapsed")
                 ticker_rows.append({"ticker": ticker, "name": name or ticker, "manual_esg": None})
         valid_tickers = [r["ticker"] for r in ticker_rows if r["ticker"]]
         if valid_tickers:
