@@ -216,7 +216,7 @@ def find_tangency(mu, cov, rf, bounds=None):
         bounds=[(0., 1.)]*n,
         constraints=[{"type": "eq", "fun": lambda w: np.sum(w) - 1}],
         options={"ftol": 1e-10, "maxiter": 1000})
-    return res.x if res.success else np.ones(n)/n
+    return res.x if res.success else np.ones(n)/n 
 
 def find_optimal(mu, cov, esg, rf, gamma, lam):
     n = len(mu)
