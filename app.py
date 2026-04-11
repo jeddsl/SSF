@@ -222,7 +222,7 @@ def find_optimal(mu, cov, esg, rf, gamma, lam):
     n = len(mu)
     esg_norm = np.asarray(esg) / 100.0
     res = minimize(
-        lambda w: -(port_ret(w, mu) - gamma / 2 * port_var(w, cov) + lam * float(np.asarray(w) @ esg_norm)),
+        lambda w: -(port_ret(w,mu) - gamma/2*port_var(w,cov) + (lam * float(np.asarray(w)@np.asarray(esg)) / max(np.sum(w), 1e-9))),
         np.ones(n) / n, method="SLSQP",
         bounds=[(0., 1.)] * n,
         constraints=[{"type": "eq", "fun": lambda w: np.sum(w) - 1}],
