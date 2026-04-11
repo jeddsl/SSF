@@ -224,14 +224,19 @@ def find_tangency(mu, cov, rf, bounds=None):
 
 def find_optimal(mu, cov, esg, rf, gamma, lam):
     n = len(mu)
-    esg_norm = np.asarray(esg) / 100.0
+    mu_adj = np.asarray(mu) + (lam / max(gamma, 1e-9)) * np.asarray(esg)
     res = minimize(
-        lambda w: -(port_ret(w,mu) - gamma/2*port_var(w,cov) + (lam * float(np.asarray(w)@np.asarray(esg)) / max(np.sum(w), 1e-9))),
-        np.ones(n)/n, method="SLSQP",
-        bounds=[(0., 1.)]*n,
-        constraints=[{"type": "ineq", "fun": lambda w: 1.0 - np.sum(w)}],
+        lambda w: -port_sr(w, mu_adj, cov, rf),
+        np.ones(n) / n, method="SLSQP",
+        bounds=[(0., 1.)] * n,
+        constraints=[{"type": "eq", "fun": lambda w: np.sum(w) - 1}],
         options={"ftol": 1e-10, "maxiter": 1000})
-    return res.x if res.success else np.ones(n)/n
+    w_tan = res.x if res.success else np.ones(n) / n
+    ret_t = port_ret(w_tan, mu)
+    sd_t  = port_sd(w_tan, cov)
+    w_star = (ret_t - rf) / (gamma * sd_t ** 2) if sd_t > 1e-9 else 0.0
+    w_star = float(np.clip(w_star, 0.0, 1.0))
+    return w_tan * w_star
 
 def build_mv_frontier(mu, cov, bounds=None, n_points=100):
     n = len(mu)
