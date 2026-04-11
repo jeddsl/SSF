@@ -229,7 +229,7 @@ def find_optimal(mu, cov, esg, rf, gamma, lam):
         lambda w: -(port_ret(w,mu) - gamma/2*port_var(w,cov) + (lam * float(np.asarray(w)@np.asarray(esg)) / max(np.sum(w), 1e-9))),
         np.ones(n)/n, method="SLSQP",
         bounds=[(0., 1.)]*n,
-        constraints=[],
+        constraints=[{"type": "ineq", "fun": lambda w: 1.0 - np.sum(w)}],
         options={"ftol": 1e-10, "maxiter": 1000})
     return res.x if res.success else np.ones(n)/n
 
@@ -295,7 +295,8 @@ def _portfolio_answer(question: str, d: dict) -> str:
     sorted_by_w   = sorted(range(n), key=lambda i: w_opt[i], reverse=True)
     sorted_by_esg = sorted(range(n), key=lambda i: esg_scores[i])
     sorted_by_sr  = sorted(range(n), key=lambda i: ind_sr[i], reverse=True)
-    u_val = ep - gamma / 2 * sp ** 2 + lam * esg_bar
+    w_sum = float(np.sum(w_opt))
+    u_val = port_ret(w_opt, mu) - gamma / 2 * sp ** 2 + lam * (float(np.dot(w_opt, esg_scores)) / max(w_sum, 1e-9))
     sharpe_cost = sr_tan_all - sr_tan_esg
     ret_cost    = ep_tan_all - ep_tan_esg
     top_w_name  = names[sorted_by_w[0]]
@@ -872,10 +873,18 @@ elif _page == "results":
 
     st.markdown(f'<div class="info-box">Tangency Sharpe — all assets: <strong>{sr_tan_all:.3f}</strong> &nbsp;|&nbsp; ESG-screened: <strong>{sr_tan_esg:.3f}</strong></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-header">Portfolio Weights</div>', unsafe_allow_html=True)
+    _rf_weight = max(0.0, 1.0 - float(np.sum(w_opt)))
+    _display_names  = names + ["Risk-Free Asset"]
+    _display_w      = [f"{w*100:.2f}" for w in w_opt] + [f"{_rf_weight*100:.2f}"]
+    _display_ret    = [f"{r*100:.2f}" for r in mu] + [f"{rf*100:.2f}"]
+    _display_vol    = [f"{v*100:.2f}" for v in vols] + ["0.00"]
+    _display_esg    = [f"{s:.2f}" for s in esg_scores] + ["N/A"]
     st.dataframe(pd.DataFrame({
-        "Asset": names, "Weight (%)": [f"{w*100:.2f}" for w in w_opt],
-        "E[R] (%)": [f"{r*100:.2f}" for r in mu], "Vol (%)": [f"{v*100:.2f}" for v in vols],
-        "ESG (0–10)": [f"{s:.2f}" for s in esg_scores],
+        "Asset": _display_names,
+        "Weight (%)": _display_w,
+        "E[R] (%)": _display_ret,
+        "Vol (%)": _display_vol,
+        "ESG (0–10)": _display_esg,
     }), use_container_width=True, hide_index=True)
 
     if input_mode == "Ticker-based input" and ticker_data_display is not None:
