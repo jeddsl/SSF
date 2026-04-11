@@ -131,6 +131,12 @@ hr { border: none !important; border-top: 1px solid var(--sep) !important; margi
 .gp-rw-b { position:absolute;top:0;left:0;white-space:nowrap;animation:gp-rw-in 5s cubic-bezier(0.16,1,0.3,1) infinite;color:var(--accent);font-weight:700; }
 [data-testid="stBaseButton-primary"] { background: #22c55e !important; color: #ffffff !important; border: none !important; border-radius: 50px !important; font-weight: 700 !important; }
 [data-testid="stBaseButton-primary"]:hover { background: #16a34a !important; color: #ffffff !important; }
+[data-testid="stExpander"] { border: 1px solid var(--sep) !important; border-radius: var(--r-md) !important; background: var(--bg-card) !important; margin-bottom: 0.75rem !important; }
+[data-testid="stExpander"] summary { color: transparent !important; font-weight: 500 !important; font-family: var(--font) !important; list-style: none !important; }
+[data-testid="stExpander"] summary::-webkit-details-marker { display: none !important; }
+[data-testid="stExpander"] summary p { color: var(--text-2) !important; font-size: 0.88rem !important; font-weight: 500 !important; }
+[data-testid="stExpander"] summary svg { display: none !important; }
+[data-testid="stExpander"] summary span { color: transparent !important; font-size: 0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
