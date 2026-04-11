@@ -223,11 +223,11 @@ def find_optimal(mu, cov, esg, rf, gamma, lam):
     esg_norm = np.asarray(esg) / 100.0
     res = minimize(
         lambda w: -(port_ret(w,mu) - gamma/2*port_var(w,cov) + (lam * float(np.asarray(w)@np.asarray(esg)) / max(np.sum(w), 1e-9))),
-        np.ones(n) / n, method="SLSQP",
-        bounds=[(0., 1.)] * n,
-        constraints=[{"type": "eq", "fun": lambda w: np.sum(w) - 1}],
+        np.ones(n)/n, method="SLSQP",
+        bounds=[(0., 1.)]*n,
+        constraints=[],
         options={"ftol": 1e-10, "maxiter": 1000})
-    return res.x if res.success else np.ones(n) / n
+    return res.x if res.success else np.ones(n)/n
 
 def build_mv_frontier(mu, cov, bounds=None, n_points=100):
     n = len(mu)
