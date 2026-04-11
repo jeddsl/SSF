@@ -204,8 +204,12 @@ def port_sr(w, mu, cov, rf):
 
 def port_stats(w, mu, cov, esg, rf):
     w = np.asarray(w)
-    ep = port_ret(w, mu); sp = port_sd(w, cov)
-    return ep, sp, (ep - rf) / sp if sp > 1e-9 else 0.0, float(w @ esg)
+    w_sum = float(np.sum(w))
+    ep_full = rf * (1 - w_sum) + port_ret(w, mu)
+    sp = port_sd(w, cov)
+    sr = (ep_full - rf) / sp if sp > 1e-9 else 0.0
+    esg_bar = float(w @ esg) / max(w_sum, 1e-9)
+    return ep_full, sp, sr, esg_bar
 
 def find_tangency(mu, cov, rf, bounds=None):
     n = len(mu)
