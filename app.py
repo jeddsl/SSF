@@ -211,12 +211,12 @@ def find_tangency(mu, cov, rf, bounds=None):
     n = len(mu)
     b = bounds or [(0., 1.)] * n
     res = minimize(
-        lambda w: -(port_ret(w,mu) - gamma/2*port_var(w,cov) + lam*float(np.asarray(w)@esg_norm)),
-        np.ones(n)/n, method="SLSQP",
-        bounds=[(0., 1.)]*n,
+        lambda w: -port_sr(w, mu, cov, rf),
+        np.ones(n) / n, method="SLSQP", bounds=b,
         constraints=[{"type": "eq", "fun": lambda w: np.sum(w) - 1}],
-        options={"ftol": 1e-10, "maxiter": 1000})
-    return res.x if res.success else np.ones(n)/n 
+        options={"ftol": 1e-10, "maxiter": 800})
+    wt = res.x if res.success else np.ones(n) / n
+    return wt, port_ret(wt, mu), port_sd(wt, cov), port_sr(wt, mu, cov, rf)
 
 def find_optimal(mu, cov, esg, rf, gamma, lam):
     n = len(mu)
