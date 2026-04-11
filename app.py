@@ -868,7 +868,7 @@ elif _page == "results":
         for sp_ in ax.spines.values(): sp_.set_color(SPINE_C)
         ax.grid(True, alpha=0.3, color=GRID_C, linestyle="--", linewidth=0.6)
 
-    u_val = ep - gamma / 2 * sp ** 2 + lam * esg_bar
+    u_val = port_ret(w_opt, mu) - gamma / 2 * sp ** 2 + lam * esg_bar
     st.markdown(f"""<div class="results-hero">
     <p class="gp-eyebrow">Optimisation Complete</p>
     <h2 class="results-title">Your Optimal Portfolio</h2>
